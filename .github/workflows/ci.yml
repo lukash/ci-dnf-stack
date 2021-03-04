@@ -28,7 +28,7 @@ jobs:
   integration-tests:
     name: Integration Tests
     needs: permission-check
-    if: needs.permission-check.outputs.has-write == 'true'
+    if: needs.permission-check.outputs.has-write == 'true' # TODO test this doesn't run if unprivileged
     strategy:
       fail-fast: false  # don't fail all matrix jobs if one of them fails
       matrix:
@@ -42,7 +42,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: ${{github.event.pull_request.head.sha}}  # check out the PR HEAD
-          fetch-depth: 0
 
       - name: Setup CI
         id: setup-ci
