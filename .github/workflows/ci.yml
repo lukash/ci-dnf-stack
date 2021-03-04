@@ -25,13 +25,47 @@ jobs:
     outputs:
       has-write: ${{steps.check-write.outputs.has-write}}
 
-  copr-build:
-    name: Copr Build
+  dnf-copr-build:
+    name: DNF Build and Test
     needs: permission-check
     if: needs.permission-check.outputs.has-write == 'true'
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/rpm-software-management/dnf-ci-host
+      options: --privileged
+    steps:
+      - name: Check out sources
+        uses: actions/checkout@v2
+        with:
+          ref: ${{github.event.pull_request.head.sha}}  # check out the PR HEAD
+          fetch-depth: 0
+
+      - name: Setup CI
+        id: setup-ci
+        uses: ./.github/actions/setup-ci
+        with:
+          copr-user: ${{secrets.COPR_USER}}
+          copr-api-token: ${{secrets.COPR_API_TOKEN}}
+
+      - name: Run Copr Build
+        id: copr-build
+        uses: ./.github/actions/copr-build
+        with:
+          copr-user: ${{steps.setup-ci.outputs.copr-user}}
+
+      - name: Run Integration Tests
+        uses: ./.github/actions/integration-tests
+        with:
+          package-urls: ${{steps.copr-build.outputs.package-urls}}
+
+  createrepo-copr-build:
+    name: Createrepo Build and Test
+    needs: permission-check
+    if: needs.permission-check.outputs.has-write == 'true'
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/rpm-software-management/dnf-ci-host
+      options: --privileged
     outputs:
       package-urls: ${{steps.copr-build.outputs.package-urls}}
     steps:
@@ -53,22 +87,10 @@ jobs:
         uses: ./.github/actions/copr-build
         with:
           copr-user: ${{steps.setup-ci.outputs.copr-user}}
-
-  integration-tests:
-    name: Integration Tests
-    needs: copr-build
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/rpm-software-management/dnf-ci-host
-      options: --privileged
-    steps:
-      - name: Check out sources
-        uses: actions/checkout@v2
-        with:
-          ref: ${{github.event.pull_request.head.sha}}  # check out the PR HEAD
-          fetch-depth: 0
+          overlay: createrepo_c-ci
 
       - name: Run Integration Tests
         uses: ./.github/actions/integration-tests
         with:
-          package-urls: ${{needs.copr-build.outputs.package-urls}}
+          package-urls: ${{steps.copr-build.outputs.package-urls}}
+          suite: createrepo_c
