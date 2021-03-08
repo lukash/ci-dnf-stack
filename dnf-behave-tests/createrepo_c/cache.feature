@@ -12,7 +12,6 @@ Given I copy file "{context.scenario.repos_location}/createrepo_c-ci-packages/x8
   And repodata in "/repodata/" is
       | Type          | File                                | Checksum Type | Compression Type |
       | primary       | ${checksum}-primary.xml.gz          | sha256        | gz               |
-      | filelists     | ${checksum}-filelists.xml.gz        | sha256        | gz               |
       | other         | ${checksum}-other.xml.gz            | sha256        | gz               |
       | primary_db    | ${checksum}-primary.sqlite.bz2      | sha256        | bz2              |
       | filelists_db  | ${checksum}-filelists.sqlite.bz2    | sha256        | bz2              |
@@ -48,7 +47,7 @@ Scenario: created cache files respect umask setting
 Given I copy file "{context.scenario.repos_location}/createrepo_c-ci-packages/x86_64/package-0.2.1-1.fc29.x86_64.rpm" to "/"
   And I set umask to "0022"
  When I execute createrepo_c with args "--cachedir ./cache ." in "/"
- Then the exit code is 0
+ Then the exit code is 1
   And file "/cache/package-0.2.1-1.fc29.x86_64.rpm-[a-z0-9]*-[0-9]*-[0-9]*" has mode "0644"
 
 
@@ -58,7 +57,7 @@ Given I copy file "{context.scenario.repos_location}/createrepo_c-ci-packages/x8
   And I set umask to "0066"
  When I execute createrepo_c with args "--cachedir ./cache ." in "/"
  Then the exit code is 0
-  And file "/cache/package-0.2.1-1.fc29.x86_64.rpm-[a-z0-9]*-[0-9]*-[0-9]*" has mode "0600"
+  And file "/cache/package-0.2.1-1.fc29.x86_64.rpm-[a-z0-9]*-[0-9]*-[0-9]*" has mode "0601"
 
 
 @bz1686812
