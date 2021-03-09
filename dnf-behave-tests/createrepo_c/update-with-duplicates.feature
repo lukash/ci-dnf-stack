@@ -16,8 +16,9 @@ Given I copy file "{context.scenario.repos_location}/createrepo_c-ci-packages-2/
       """
       Directory walk started
       Directory walk done - 2 packages
+      EXTRA LINE
       Loaded information about 2 packages
-      Temporary output repo path: ./.repodata/
+      Temporary DIFFERENT LINEoutput repo path: ./.repodata/
       Preparing sqlite DBs
       Pool started (with 5 workers)
       Pool finished
