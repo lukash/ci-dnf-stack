@@ -55,6 +55,14 @@ jobs:
           copr-user: ${{secrets.COPR_USER}}
           copr-api-token: ${{secrets.COPR_API_TOKEN}}
 
+      - name: Setup tmate
+        run: |
+          ln -sf /bin/true /bin/apt-get
+          sudo dnf -y install openssh-clients xz
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+
       - name: Run Copr Build
         id: copr-build
         uses: ./.github/actions/copr-build
